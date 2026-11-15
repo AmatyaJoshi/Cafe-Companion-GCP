@@ -1,0 +1,15 @@
+{
+  "name": "cafe-companion-gcp",
+  "version": "1.0.0",
+  "description": "Cafe Companion: Intelligent Third Place Ecosystem powered by Gemini AI on GCP",
+  "scripts": {
+    "dev": "python run_dev.py",
+    "test:backend": "cd backend-ai && python -m unittest test_ai_backend.py",
+    "build:frontend": "cd frontend && npm run build",
+    "build:realtime": "cd backend-realtime && npm run build",
+    "build": "npm run build:realtime && npm run build:frontend"
+  },
+  "keywords": ["cafe", "gemini-ai", "react", "express", "fastapi", "typescript", "gcp"],
+  "author": "",
+  "license": "MIT"
+}

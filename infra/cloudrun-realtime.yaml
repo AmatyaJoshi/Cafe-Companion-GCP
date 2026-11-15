@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cafe-companion-realtime
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/sessionAffinity: "true"
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/cafe-companion-realtime:latest
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 1000m
+        env:
+        - name: AI_BACKEND_URL
+          value: "https://cafe-companion-ai-uc.a.run.app"
