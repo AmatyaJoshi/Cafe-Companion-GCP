@@ -11,7 +11,7 @@ class TestCafeCompanionBackend(unittest.TestCase):
         self.client = TestClient(app)
 
     def test_root_health(self):
-        response = self.client.get("/")
+        response = self.client.get("/api/health")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["service"], "Cafe Companion AI Backend")

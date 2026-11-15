@@ -5,6 +5,8 @@ Powered by FastAPI and Google Gemini AI
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import os
@@ -258,15 +260,39 @@ class TasteRecommendRequest(BaseModel):
     dietary: Optional[List[str]] = Field(default_factory=list)
 
 
+# Static frontend distribution path check
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(STATIC_DIR):
+    STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+
+if os.path.exists(STATIC_DIR):
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+
 # --- Core Logic & Endpoints ---
 
-@app.get("/")
-def root():
+@app.get("/api/health")
+def api_health():
     return {
         "service": "Cafe Companion AI Backend",
         "status": "online",
         "gemini_active": gemini_client is not None,
         "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.get("/")
+def root():
+    index_html = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_html):
+        return FileResponse(index_html)
+    return {
+        "service": "Cafe Companion AI Backend",
+        "status": "online",
+        "gemini_active": gemini_client is not None,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "docs_url": "/docs"
     }
 
 @app.get("/api/menu")
@@ -650,6 +676,18 @@ def get_personalized_recommendation(req: TasteRecommendRequest):
         },
         "recommendations": recommendations
     }
+
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    if full_path.startswith("api/") or full_path in ["docs", "openapi.json", "redoc"]:
+        raise HTTPException(status_code=404, detail="Not Found")
+    file_path = os.path.join(STATIC_DIR, full_path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index_html = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_html):
+        return FileResponse(index_html)
+    raise HTTPException(status_code=404, detail="Not Found")
 
 if __name__ == "__main__":
     import uvicorn

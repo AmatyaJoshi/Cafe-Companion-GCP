@@ -1,7 +1,7 @@
 import { MenuItem, CafePatron, RoomTelemetry, OrderTicket } from '../types';
 
-const AI_API_BASE = 'http://localhost:8000';
-const REALTIME_API_BASE = 'http://localhost:5000';
+const AI_API_BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '' : 'http://localhost:8000';
+const REALTIME_API_BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '' : 'http://localhost:5000';
 
 export const fallbackMenu: MenuItem[] = [
   {
